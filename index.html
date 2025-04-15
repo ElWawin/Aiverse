@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Wawin GPT-4o Chat</title>
+  <title>AI.Verse - Chat IA</title>
   <style>
     body {
       margin: 0;
@@ -25,20 +25,24 @@
     header h1 {
       margin: 0;
       font-size: 1.4rem;
+      font-weight: bold;
     }
     #chat {
-      max-height: 70vh;
+      max-height: 90vh;
       overflow-y: auto;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      height: 100vh;
+      justify-content: flex-start;
     }
     .msg {
       padding: 10px;
       border-radius: 10px;
       max-width: 80%;
       position: relative;
+      animation: fadeIn 1s ease-in-out;
     }
     .user {
       align-self: flex-end;
@@ -48,6 +52,7 @@
     .ai {
       align-self: flex-start;
       background: #333;
+      color: white;
     }
     .toolbar {
       display: flex;
@@ -84,6 +89,16 @@
     .loading {
       font-style: italic;
       opacity: 0.6;
+    }
+
+    /* Animaciones fluidas */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     /* Estilos de los botones personalizados */
@@ -191,11 +206,27 @@
     .discord-btn:hover::before {
       box-shadow: inset 0 0 0 10em rgba(88, 101, 242, 1);
     }
+
+    /* Estilo del botón de enviar */
+    button {
+      padding: 15px 30px;
+      background: #4e54c8;
+      color: white;
+      font-size: 1.2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #3838a5;
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Chat IA - Wawin</h1>
+    <h1>AI.Verse - Chat IA</h1>
     <button class="mode-toggle" onclick="toggleMode()">Modo Claro/Oscuro</button>
   </header>
 
@@ -268,53 +299,23 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer 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",
-          "HTTP-Referer": "https://tupagina.com",
-          "X-Title": "Wawin GPT Web"
+          "Authorization": `Bearer YOUR_API_KEY`,
         },
         body: JSON.stringify({
           model: model,
-          messages: [{ role: "user", content: text }]
-        })
+          messages: [{ role: "user", content: text }],
+        }),
       });
-      const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || "Error de respuesta.";
-      loading.remove();
-      lastReply = reply;
-      appendMessage("ai", reply);
-      speak(reply);
-      saveHistory(text, reply);
-    }
 
-    function speak(text) {
-      const msg = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.speak(msg);
+      const data = await res.json();
+      lastReply = data.choices[0].message.content;
+      loading.remove();
+      appendMessage("ai", lastReply);
     }
 
     function startVoice() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "es-ES";
-      recognition.start();
-      recognition.onresult = function (event) {
-        input.value = event.results[0][0].transcript;
-      };
+      // Aquí puedes integrar la API de voz si la deseas
     }
-
-    function saveHistory(user, ai) {
-      const history = JSON.parse(localStorage.getItem("wawinChat") || "[]");
-      history.push({ user, ai });
-      localStorage.setItem("wawinChat", JSON.stringify(history));
-    }
-
-    function loadHistory() {
-      const history = JSON.parse(localStorage.getItem("wawinChat") || "[]");
-      for (const h of history) {
-        appendMessage("user", h.user);
-        appendMessage("ai", h.ai);
-      }
-    }
-
-    loadHistory();
   </script>
 </body>
 </html>
