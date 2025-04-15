@@ -64,10 +64,11 @@
     .toolbar {
       display: flex;
       padding: 10px;
-      gap: 10px;
+      gap: 20px; /* Aumentamos el espacio entre los botones */
       background: #222;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     input, select, button {
       padding: 12px;
@@ -163,6 +164,7 @@
       cursor: pointer;
       border-radius: 25px;
       transition: all 0.3s ease;
+      margin: 10px;
     }
 
     .insta-btn {
@@ -284,26 +286,36 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer YOUR_API_KEY`, // Reemplazar con tu API Key
+            "Authorization": `Bearer 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`
           },
           body: JSON.stringify({
             model: model,
             messages: [{ role: "user", content: text }],
-          }),
+            temperature: 0.7,
+            max_tokens: 100
+          })
         });
-
         const data = await res.json();
         lastReply = data.choices[0].message.content;
-        loading.remove();
+        loading.innerHTML = lastReply;
         appendMessage("ai", lastReply);
       } catch (error) {
-        loading.remove();
-        appendMessage("ai", "Ocurrió un error. Intenta de nuevo.");
+        console.error(error);
+        loading.innerText = "Ocurrió un error. Intenta nuevamente.";
       }
     }
 
+    // Activar el reconocimiento de voz
     function startVoice() {
-      // Aquí puedes agregar la función para el reconocimiento de voz
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'es-ES';
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript;
+        send();
+      };
     }
   </script>
 </body>
